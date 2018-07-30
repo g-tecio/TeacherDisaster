@@ -10,55 +10,55 @@ import UIKit
 import SpriteKit
 import GameplayKit
 
-class GameViewController: UIViewController {
+// TODO: Fix this class
 
+class GameViewController: UIViewController {
+    
+    // MARK: App Properties
+    
+    /// Scene State Machine
+    var sceneStateMachine: GKStateMachine!
+    
+    /// Scenes
+    var gameScene: GameScene!
+    var menuScene: MenuScene!
+    var instructionsScene: InstructionsScene!
+    
+    // MARK: Override Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Load 'GameScene.sks' as a GKScene. This provides gameplay related content
-        // including entities and graphs.
-        if let scene = GKScene(fileNamed: "GameScene") {
-            
-            // Get the SKScene from the loaded GKScene
-            if let sceneNode = scene.rootNode as! GameScene? {
-                
-                // Copy gameplay related content over to the scene
-                sceneNode.entities = scene.entities
-                sceneNode.graphs = scene.graphs
-                
-                // Set the scale mode to scale to fit the window
-                sceneNode.scaleMode = .aspectFill
-                
-                // Present the scene
-                if let view = self.view as! SKView? {
-                    view.presentScene(sceneNode)
-                    
-                    view.ignoresSiblingOrder = true
-                    
-                    view.showsFPS = true
-                    view.showsNodeCount = true
-                }
-            }
-        }
+        /// MenuScene Setup
+        menuScene = MenuScene.init(sceneSize: view.bounds.size, referenceGVC: self)
+        
+        /// InstructionsScene Setup
+        instructionsScene = InstructionsScene.init(sceneSize: view.bounds.size, referenceGVC: self)
+        
+        /// GameScene Setup
+        gameScene = GameScene.init(sceneSize: view.bounds.size, referenceGVC: self)
+        
+        /// Creates SceneStateMachine and adds states, then enters GameSceneState
+        sceneStateMachine = GKStateMachine(states: [    GameSceneState(referenceGVC: self),
+                                                        MenuSceneState(referenceGVC: self),
+                                                        InstructionsSceneState(referenceGVC: self)
+                                                            ] )
+        sceneStateMachine.enter(MenuSceneState.self)
     }
-
+    
     override var shouldAutorotate: Bool {
-        return true
+        return false
     }
-
+    
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
-        } else {
-            return .all
-        }
+        return .landscape
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
-
+    
     override var prefersStatusBarHidden: Bool {
         return true
     }
